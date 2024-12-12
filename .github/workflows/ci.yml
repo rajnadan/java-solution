@@ -1,0 +1,41 @@
+name: CI - Unit Test
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java-version: [17]
+
+    steps:
+      # Step 1: Check out the code
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+
+      # Step 3: Cache Maven dependencies for faster builds
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 4: Install dependencies and run tests
+      - name: Install dependencies and run tests
+        run: mvn clean test
+        
